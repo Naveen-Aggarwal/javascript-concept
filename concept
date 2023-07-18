@@ -1,0 +1,86 @@
+SYMBOL
+So, to summarize, a symbol is a “primitive unique value” with an optional description. Let’s see where we can use them.
+
+> Symbols don’t auto-convert to a string
+> Symbols allow us to create “hidden” properties of an object, that no other part of code can accidentally access or overwrite.
+>If we want to use a symbol in an object literal {...}, we need square brackets around it. That’s because we need the value from the variable id as the key, not the string “id”.
+Like this:
+
+let id = Symbol("id");
+
+let user = {
+  name: "John",
+  [id]: 123 // not "id": 123
+};
+>Symbolic properties do not participate in for..in loop….Object.keys(user) also ignores them.
+>In contrast, Object.assign copies both string and symbol properties:
+
+Object to primitive conversion
+> That’s an important limitation: the result of obj1 + obj2 (or another math operation) can’t be another object!
+
+PRIMITIVE
+* Formally, these methods work via temporary objects, but JavaScript engines are well tuned to optimize that internally, so they are not expensive to call.
+Try running it:
+	let str = "Hello";
+	str.test = 5; // (*)
+	alert(str.test);
+
+Depending on whether you have use strict or not, the result may be:
+1. undefined (no strict mode)
+2. An error (strict mode).
+Why? Let’s replay what’s happening at line (*):
+1. When a property of str is accessed, a “wrapper object” is created.
+2. In strict mode, writing into it is an error.
+3. Otherwise, the operation with the property is carried on, the object gets the test property, but after that the “wrapper object” disappears, so in the last line str has no trace of the property.
+This example clearly shows that primitives are not objects.
+They can’t store additional data.
+
+> Can’t we just use the comparison === NaN? Unfortunately not. The value NaN is unique in that it does not equal anything, including itself:
+	alert( NaN === NaN ); // false
+
+—————————————————————————————————————————————————————
+> Infinite loop due to precision loss in NUMBER store in memory are not optimised for base 10 fraction, they are good for base 2 fractions:
+
+That’s because i would never equal 10.
+Run it to see the real values of i:
+
+let i = 0;
+while (i < 11) {
+  i += 0.2;
+  if (i > 9.8 && i < 10.2) alert( i );
+}
+
+None of them is exactly 10.
+Such things happen because of the precision losses when adding fractions like 0.2.
+Conclusion: evade equality checks when working with decimal fractions.
+
+CONSTRUCTOR ( THIS) use,
+> Constructor functions technically are regular functions. There are two conventions though:
+1. They are named with capital letter first.
+2. They should be executed only with "new" operator.
+For instance:
+
+function User(name) {
+  this.name = name;
+  this.isAdmin = false;
+}
+let user = new User("Jack");
+alert(user.name); // Jack
+alert(user.isAdmin); // false
+
+When a function is executed with new, it does the following steps:
+1. A new empty object is created and assigned to this.
+2. The function body executes. Usually it modifies this, adds new properties to it.
+3. The value of this is returned.
+In other words, new User(...) does something like:
+
+function User(name) {
+  // this = {};  (implicitly)
+
+  // add properties to this
+  this.name = name;
+  this.isAdmin = false;
+
+  // return this;  (implicitly)
+}
+
